@@ -20,6 +20,7 @@
     "axios": "^1.7.2",
     "express": "^4.19.2",
     "mdui": "^2.1.1",
+    "mitt": "^3.0.1",
     "mongoos": "0.0.1-security",
     "oidc-client": "^1.11.5",
     "pinia": "^2.1.7",

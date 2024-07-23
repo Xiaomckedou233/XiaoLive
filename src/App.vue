@@ -1,14 +1,14 @@
 <template>
-  <mdui-layout>
-    <mdui-layout-header>
+  <mdui-layout class="mdui-theme-auto layout">
+    <mdui-layout-header class="mdui-theme-auto">
       <TopAppBar />
     </mdui-layout-header>
-    <mdui-layout-main class="main-content">
-      <div class="live-container">
-        <div class="player-container">
+    <mdui-layout-main class="main-content mdui-theme-auto">
+      <div class="live-container mdui-theme-auto">
+        <div class="player-container mdui-theme-auto">
           <LivePlayer />
         </div>
-        <div class="chat-container">
+        <div class="chat-container mdui-theme-auto">
           <ChatBar />
         </div>
       </div>
