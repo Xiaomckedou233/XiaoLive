@@ -64,7 +64,10 @@ interface Message {
   sender: string
   content: string
   isAdmin: boolean
-  userStatus: string
+  time?: string
+  timestamp: Date
+  color?: string
+  type?: string
 }
 
 interface ServerResponse {
@@ -81,7 +84,7 @@ interface BanUserResponse {
 let socket: Socket
 
 const initSocket = () => {
-  socket = io('http://192.168.1.2:3000')
+  socket = io('http://192.168.1.2:3000') // 改成实际服务器地址
 
   socket.on('connect', () => {
     showSnackbar('连接成功')
@@ -93,7 +96,11 @@ const initSocket = () => {
   })
 
   socket.on('messages', (serverMessages: Message[]) => {
-    messages.value = serverMessages
+    if (messages.value.length === 0) {
+      messages.value = serverMessages
+    } else {
+      messages.value = [...serverMessages.reverse(), ...messages.value]
+    }
     scrollToBottom()
   })
 
@@ -132,6 +139,8 @@ let isAdmin = ref(false)
 const banDialogOpen = ref(false)
 const banReason = ref('')
 let userToBan = ref('')
+let lastMessageTimestamp = ref<string | null>(null)
+let isLoadingMoreMessages = ref(false)
 
 const openBanDialog = (message: Message) => {
   userToBan.value = message.sender
@@ -186,15 +195,36 @@ watch(
   { immediate: true }
 )
 
+watch(messages, (newMessages) => {
+  if (newMessages.length > 0) {
+    // 确保 timestamp 是 Date 对象
+    newMessages.forEach((message) => {
+      if (typeof message.timestamp === 'string') {
+        message.timestamp = new Date(message.timestamp)
+      }
+    })
+    lastMessageTimestamp.value = newMessages[0].timestamp.toISOString()
+  }
+})
+
 onMounted(() => {
   initSocket()
   checkAdminStatus()
+
+  // Add scroll event listener for infinite scrolling
+  const messagesElement = messagesContainer.value
+  if (messagesElement) {
+    messagesElement.addEventListener('scroll', () => {
+      if (messagesElement.scrollTop === 0 && !isLoadingMoreMessages.value) {
+        loadMoreMessages()
+      }
+    })
+  }
 })
 
-const getMessages = () => {
+const getMessages = (before?: string) => {
   if (socket) {
-    socket.emit('getMessage', (response: ServerResponse) => {
-      console.log(response)
+    socket.emit('getMessage', { before }, (response: ServerResponse) => {
       if (!response.success) {
         alert({
           headline: '你好像被封禁啦!',
@@ -202,6 +232,7 @@ const getMessages = () => {
           confirmText: '好吧.......'
         })
       }
+      isLoadingMoreMessages.value = false
     })
   }
 }
@@ -216,7 +247,12 @@ const sendMessage = () => {
   if (socket) {
     socket.emit(
       'sendMessage',
-      { content: inputMessage.value, sender: user },
+      {
+        content: inputMessage.value,
+        sender: user,
+        color: '16777215', // 设置默认颜色为白色
+        type: '0' // 保持默认类型为 'right'
+      },
       (response: ServerResponse) => {
         if (response.success) {
           inputMessage.value = ''
@@ -226,6 +262,13 @@ const sendMessage = () => {
         }
       }
     )
+  }
+}
+
+const loadMoreMessages = () => {
+  if (!isLoadingMoreMessages.value && lastMessageTimestamp.value) {
+    isLoadingMoreMessages.value = true
+    getMessages(lastMessageTimestamp.value)
   }
 }
 

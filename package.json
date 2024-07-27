@@ -19,6 +19,7 @@
     "@zitadel/vue": "^1.0.4",
     "axios": "^1.7.2",
     "express": "^4.19.2",
+    "flv.js": "^1.6.2",
     "mdui": "^2.1.1",
     "mitt": "^3.0.1",
     "mongoos": "0.0.1-security",

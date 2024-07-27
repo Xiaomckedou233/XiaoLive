@@ -19,7 +19,7 @@ onMounted(() => {
     },
     danmaku: {
       id: 'chat-bar',
-      api: 'http://localhost:3000/api/danmaku', // 更新为实际的弹幕 API URL
+      api: 'http://192.168.1.2:3000/api/', // 更新为实际的地址
       maximum: 1000,
       user: 'DPlayer',
       bottom: '15%',
